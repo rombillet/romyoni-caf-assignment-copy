@@ -1,0 +1,554 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper]{geometry}
+
+\usepackage{afterpage}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{xcolor}
+
+\usepackage{fontspec}
+\setmainfont[]{Open Sans}
+
+\newfontfamily\adventurefont{Adventure}
+
+\newcommand{\HUGE}{\fontsize{30pt}{36pt}\selectfont}
+
+\newcommand{\adventuresection}[1]{%
+    \section*{\centering\HUGE\adventurefont #1}%
+}
+
+\usepackage{minted}
+\usemintedstyle{friendly}
+
+\usepackage{enumitem}
+
+\usepackage{xspace}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=bgu_black, urlcolor=bgu_orange1}
+
+\usepackage{wrapfig}
+
+\definecolor{bgu_orange1}{RGB}{247,148,30}
+\definecolor{bgu_orange2}{RGB}{243,116,33}
+\definecolor{bgu_orange3}{RGB}{255,99,39}
+\definecolor{bgu_orange4}{RGB}{255,120,39}
+\definecolor{bgu_orange5}{RGB}{255,129,63}
+\definecolor{bgu_green1}{RGB}{78, 183, 87}
+\definecolor{bgu_black}{RGB}{0,0,0}
+\definecolor{bgu_gray1}{RGB}{88,89,91}
+\definecolor{bgu_gray2}{RGB}{130,132,135}
+\definecolor{bgu_gray3}{RGB}{155,157,160}
+\definecolor{bgu_gray4}{RGB}{207,214,218}
+\definecolor{bgu_white}{RGB}{255,255,255}
+
+\setlength{\parskip}{\baselineskip}
+\setlength\parindent{0pt}
+
+\begin{document}
+
+\newgeometry{margin=0in}
+\thispagestyle{empty} % No page number
+\noindent
+\includegraphics[width=\paperwidth,height=\paperheight]{assets/asp-cover}
+
+\restoregeometry
+
+\clearpage
+\thispagestyle{empty}
+\section*{IMPORTANT POLICIES}
+
+\textbf{Academic integrity and AI:} This assignment requires your own analysis and understanding.
+While you may consult external resources, all written work must be in your own words.
+You are encouraged to work with the latest AI tools, but submissions containing unedited AI output or lack original analysis will be \textbf{disqualified}.
+You may discuss the assignment with other students, but each submission must be your own.
+
+\textbf{Collaboration:} This assignment is submitted in pairs.
+Collaboration is to be done via a single GitHub repository forked from the original course repository.
+Your repositories should be private.
+Do not share them with other students.
+Do not open pull requests to the original repository unless asked to do so.
+
+\textbf{Getting help:} If you encounter technical issues you cannot resolve after reasonable effort, contact course staff.
+Learning when to seek help (and when not to) is part of the assignment.
+
+\vfill
+
+\begin{center}
+    \includegraphics[width=200px]{assets/snake}
+\end{center}
+
+\clearpage
+\setcounter{page}{1}
+
+\adventuresection{introduction}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr-fancy}
+\end{center}
+
+\begin{wrapfigure}[5]{l}{64pt}
+    \vspace{-1em}
+    \includegraphics[width=64pt]{assets/console}
+\end{wrapfigure}
+
+\textbf{Welcome to Advanced Systems Programming 2026!}
+This assignment introduces you to a real-world codebase called CAF (Content Addressable Filesystem), a lightweight version control system similar to git, written in Python and C++.
+CAF was thoughtfully developed by previous students (Meshi, Bar, and Omer) and serves as your gateway to understanding how complex systems are architected, implemented, and maintained.
+Though it may appear modest in scale, CAF contains the same fundamental challenges found in production systems: command line interfaces, state management, file operations, data integrity, and more.
+Through this project, you'll develop essential skills in code analysis, system design, debugging, and feature implementation.
+You'll learn not just how real-world systems work, but why they're designed the way they are.
+
+\textbf{Prerequisites:}
+\vspace{-1em}
+\begin{itemize}
+    \item Basic familiarity with Python and C++
+    \item Docker installed and functional
+    \item git basics (clone, commit, push)
+    \item Command-line comfort
+\end{itemize}
+
+\textbf{Learning objectives:}
+\vspace{-1em}
+\begin{itemize}
+    \item Analyze and understand complex, multi-language codebases
+    \item Map software architecture and component relationships
+    \item Debug and fix issues in unfamiliar code
+    \item Implement new features following existing patterns
+    \item Communicate technical findings clearly
+\end{itemize}
+
+\clearpage
+\adventuresection{getting started: setting up the project}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr2}
+\end{center}
+
+\textbf{Repository setup:}
+\vspace{-1em}
+\begin{enumerate}
+    \item Fork the repository to your own GitHub account from: \\ \url{https://github.com/idoby/asp-caf-assignment}
+    \item Students working together should collaborate using \textbf{one fork}.
+          Do not open any pull requests to the original repository!
+    \item Clone your forked repository to your local machine
+    \item Refer to the \texttt{README.md} file in the root directory of the repository for detailed setup instructions, usage examples, and project overview.
+          It contains comprehensive information about the project structure, commands, and development workflow
+\end{enumerate}
+
+Next, we will delve into the codebase and its accompanying files, charting the layout and tracing the flow of information throughout the system.
+In the sections ahead, we will uncover the remnants of past decisions, examine the directory structure, and outline the boundaries of each module.
+Picture it as exploring an ancient ruin, uncovering its secrets one directory at a time.
+
+\begin{center}
+    \includegraphics[width=0.5\textwidth]{assets/git-temple}
+\end{center}
+
+\clearpage
+\adventuresection{task 1: exploring the codebase}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr1}
+\end{center}
+
+\begin{wrapfigure}[6]{l}{54px}
+    \includegraphics[width=54px]{assets/spyglass}
+\end{wrapfigure}
+
+In this section, you will develop your ability to analyze, synthesize, and communicate technical information by exploring the project.
+Create a comprehensive list of all significant files and directories, and for each, provide a thoughtful analysis of its purpose, role, and relationships within the project.
+This will lay the foundation for deeper exploration in the sections ahead.
+
+\textbf{Objective:} Create a comprehensive catalog of the project's structure and understand each component's role.
+
+
+\textbf{Required analysis:}
+For each significant file or logical group of files, provide:
+\vspace{-2em}
+\begin{enumerate}
+    \item \textbf{Functionality:} What does this file do?
+    \item \textbf{Purpose:} Why is it needed in the project?
+    \item \textbf{Relationships:} How does it connect to other components, if any?
+    \item \textbf{Your insight:} Your own understanding or observation, if applicable.
+\end{enumerate}
+
+\textbf{What constitutes "significant" files:}
+\vspace{-1em}
+\begin{itemize}
+    \item Core source files (Python/C++ modules with >20 lines)
+    \item Configuration files (Makefile, Dockerfile, setup files)
+    \item Test files and test infrastructure
+    \item You may exclude: temporary files, \texttt{\_\_pycache\_\_}, \texttt{.gitignore},
+          and other files that do not contribute to the project's functionality or structure.
+\end{itemize}
+
+\textbf{Deliverable:} A structured list with your analysis.
+
+\textbf{Example of quality analysis:}
+Your analysis should be clear, concise, and insightful.
+It does not have to be this detailed, but it should show that you have thought about the purpose and role of each file or group of files.
+\vspace{-1em}
+\begin{enumerate}
+    \item \texttt{caf/caf/\_\_main\_\_.py:} This file serves as the application entry point, enabling CAF to run as both a module (\texttt{python -m caf}) and installed command (\texttt{caf}). It leverages Python's \texttt{\_\_name\_\_} mechanism to detect script execution and delegates to the CLI module.
+          This separation keeps the main logic in cli.py while providing multiple execution pathways.
+    \item \texttt{caf/caf/cli.py:}
+          This file implements the command-line interface (CLI) for the CAF application.
+          It defines the commands and options available to users, such as \texttt{init}, \texttt{commit}, and others.
+          The CLI is built using the \texttt{argparse} library, which simplifies the creation of command-line interfaces in Python.
+          The \texttt{cli()} function is called from \texttt{\_\_main\_\_.py}.
+          It uses a data structure that describes each command, its options, and its arguments to dispatch the appropriate function when a command is invoked.
+          Actual command implementations live in \texttt{cli\_commands.py}.
+\end{enumerate}
+
+\textbf{Tips:}
+\vspace{-1em}
+\begin{itemize}
+    \item Look for patterns in file names and directory structure.
+    \item Try to infer the flow of information and control between files.
+    \item Consider how each file contributes to the overall goals of the project.
+    \item If you use external help (like Google or an AI tool), always process and rephrase the information in your own words.
+\end{itemize}
+
+This exercise is not just about cataloging files.
+It's about developing your ability to analyze, synthesize, and communicate technical information.
+Your insights here will lay the foundation for deeper exploration in the sections ahead.
+
+
+\clearpage
+\adventuresection{task 2: mapping the codebase}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr3}
+\end{center}
+
+\begin{wrapfigure}[5]{l}{64px}
+    \vspace{-1em}
+    \includegraphics[width=64px]{assets/map}
+\end{wrapfigure}
+
+In this section, you will build a mental model of the project as a system.
+You will identify the main concepts, modules, classes, and functions, and map how they interact.
+This will help you see how the pieces fit together and make you more effective in extending and maintaining the codebase.
+
+\textbf{Objective:} Create a visual representation of how the system components interact and information flows through the application.
+
+\textbf{Required diagram elements:}
+\vspace{-1em}
+\begin{itemize}
+    \item Main modules and their primary responsibilities
+    \item Key classes and their relationships
+    \item Entry points and execution flow
+    \item Python/C++ boundaries and interfaces
+    \item Data flow between components
+    \item File system interactions
+\end{itemize}
+
+\textbf{Special focus areas:}
+\vspace{-1em}
+\begin{itemize}
+    \item \textbf{Language Integration:} Where is the Python/C++ boundary?
+          How do they communicate?
+          What information or data is passed between them?
+    \item \textbf{Data Persistence:} How is repository state stored and retrieved?
+    \item \textbf{Command Processing:} Path from CLI input to execution
+    \item \textbf{Error Handling:} How errors propagate through the system
+\end{itemize}
+
+\clearpage
+\textbf{Diagram requirements:}
+\vspace{-1em}
+\begin{itemize}
+    \item Use clear shapes and colors to distinguish component types
+    \item Include directional arrows showing information/control flow
+    \item Label connections with the type of interaction
+    \item Acceptable formats: PDF, PNG, PPTX or JPG (scanned hand-drawn diagrams must be clearly legible, well-organized, and visually appealing)
+    \item Recommended tools: draw.io, Lucidchart, PowerPoint or similar
+\end{itemize}
+
+\textbf{Deliverable:} A single, comprehensive diagram with accompanying brief explanation (1-2 paragraphs) of your architectural insights.
+Your map should reflect your own understanding.
+Do not simply copy output from an AI tool or documentation generation tool!
+
+The best diagrams will be those that clearly and accurately represent the system architecture, show deep understanding of the codebase, and are visually appealing.
+It might be included in future course materials, so make it your best work!
+
+This section is about building a mental model of the project as a system rather than flat textual files.
+This is a crucial skill in programming, as it allows you to see how different parts of the codebase interact and depend on each other.
+The more clearly you can see how the pieces fit together, the more effective you will be in extending and maintaining the codebase.
+
+\clearpage
+\adventuresection{task 3: bringing the project to life}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr2}
+\end{center}
+
+\begin{wrapfigure}[5]{l}{64px}
+    \vspace{-1.2em}
+    \includegraphics[width=64px]{assets/rocket}
+\end{wrapfigure}
+
+Now that you have explored the codebase and mapped its structure, your next step is to get the project running on your own machine.
+We use Docker, which simplifies the setup of a consistent development environment.
+This ensures you can bring the project to life and begin experimenting with it easily.
+
+\textbf{Objective:} Set up the development environment and run the test suite.
+
+\textbf{Setup steps:}
+\vspace{-1em}
+\begin{enumerate}
+    \item Build the Docker image using the provided Makefile
+    \item Start and enter the Docker container
+    \item Deploy the library (libcaf) and the CLI (caf) in the container
+    \item Verify the environment by running basic CAF commands
+    \item Execute the complete test suite using \texttt{pytest}
+\end{enumerate}
+
+See the project \texttt{Makefile} for commands to execute outside and inside the container.
+If you encounter issues you cannot resolve, contact the course staff for help.
+Part of the assignment is learning to how to solve problems yourself, and also when to seek assistance.
+
+\textbf{Testing the application:}
+\vspace{-1em}
+\begin{enumerate}
+    \item Run \texttt{pytest} to see detailed test results
+    \item Record which tests pass/fail with exact counts
+    \item For failing tests, note the error messages
+    \item Test basic CLI functionality manually (e.g., \texttt{caf --help})
+\end{enumerate}
+\textbf{Deliverable:} None.
+
+\clearpage
+\adventuresection{task 4: debugging and fixing failing tests}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr1}
+\end{center}
+
+\begin{wrapfigure}[6]{l}{70px}
+    \vspace{-1em}
+    \includegraphics[width=70px]{assets/bug}
+\end{wrapfigure}
+
+In this section, you will develop your debugging and problem-solving skills.
+Once you have run the test suite, you will find that some tests don't pass.
+Investigate these failing tests, understand the reasons behind their failure, and fix the underlying issues.
+Focus on understanding the intent of the code and tests, and make thoughtful, minimal changes.
+
+\textbf{Objective:} Develop systematic debugging skills and fix code issues that cause test failures.
+
+\textbf{Debugging methodology:}
+\vspace{-1em}
+\begin{enumerate}
+    \item \textbf{Identify:} Which specific tests are failing?
+    \item \textbf{Analyze:} Read test code to understand expected behavior
+    \item \textbf{Investigate:} Trace through application code to find the issue, perhaps using print statements or a debugger
+    \item \textbf{Hypothesize:} Form a theory about the root cause
+    \item \textbf{Fix:} Make minimal, targeted changes to the application or test code as needed
+    \item \textbf{Verify:} Re-run tests to confirm the fix
+\end{enumerate}
+
+\textbf{Understanding the failing tests:}
+
+When you run the test suite, you will encounter two kinds of failing tests.
+Understanding why each test fails is crucial to developing effective debugging skills:
+
+\vspace{-1em}
+\begin{itemize}
+    \item Some tests fail because they correctly verify behavior that the current implementation does not properly handle.
+          The test is valid, but the code has a bug.
+          In cases like these, your task is to \textbf{fix the underlying code} to make the invariants tested by the tests hold true.
+
+    \item Some tests fail due to relying on details that they should not be relying on.
+          The test simply isn't robust in the face of changes.
+          While you could fix the code to match the expected outcome, the proper fix is to \textbf{make the test less reliant on irrelevant details} by modifying the test itself.
+\end{itemize}
+
+\textbf{Important constraints:}
+\vspace{-1em}
+\begin{itemize}
+    \item Make minimal changes that address root causes
+    \item Preserve existing functionality
+    \item Document your reasoning for each change
+    \item All existing tests should pass after your fixes
+    \item Do not disable or modify \textbf{correct} tests to make them pass
+\end{itemize}
+
+\textbf{Debugging tips and techniques:}
+\vspace{-1em}
+\begin{itemize}
+    \item Add print statements to trace execution
+    \item Use the Python debugger in PyCharm, VS Code, or the command line (\texttt{pdb})
+    \item Verify assumptions about data structures and types
+\end{itemize}
+
+\textbf{Deliverable:}
+For each fix you made:
+\vspace{-1em}
+\begin{itemize}
+    \item Test name(s) and original failure reason(s)
+    \item Your analysis of the root cause
+    \item Brief description of the specific code changes you made
+    \item Verification that the fix works and the tests now pass (for example, a screenshot of the passing test suite)
+    \item Any remaining issues, partial solutions or challenges you faced
+    \item Include a link to a GitHub branch or pull request that shows your changes, and provide a written explanation in your submission
+\end{itemize}
+
+\clearpage
+\adventuresection{task 5: implementing a tagging feature}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr-git}
+\end{center}
+
+\begin{wrapfigure}[6]{l}{64px}
+    \vspace{-1em}
+    \includegraphics[width=64px]{assets/tag}
+\end{wrapfigure}
+
+Your next challenge is to extend the CAF project by implementing a feature inspired by git's tagging system.
+This will require you to research what a git ``tag'' is, understand its purpose and implementation, and then design and build a similar feature for the CAF project.
+Focus on writing robust, documented code that is consistent with the rest of the project.
+
+\textbf{Objective:} Research, design, and implement a git-style tagging system for the CAF project.
+
+\textbf{Research phase:}
+Research git's tagging system and document:
+\vspace{-1em}
+\begin{itemize}
+    \item What are git tags and how are they different from branches and commits?
+    \item Common use cases (releases, milestones, etc)
+    \item Storage mechanism and relationship to commits
+\end{itemize}
+
+\textbf{Minimum implementation requirements:}
+\vspace{-1em}
+\begin{itemize}
+    \item \textbf{Data model:} Objects/data structures to represent tags
+    \item \textbf{Storage:} File system representation (where/how tags are stored)
+    \item \textbf{Operations:}
+          \begin{itemize}
+              \item List tags: \texttt{caf tags}
+              \item Create tag: \texttt{caf create\_tag <tag name> <commit-hash>}
+              \item Delete tag: \texttt{caf delete\_tag <tag name>}
+          \end{itemize}
+    \item \textbf{CLI integration:} Add tag commands to existing CLI structure
+    \item \textbf{Tests:} Unit tests for tag operations and CLI functionality (separate logic and CLI tests)
+    \item \textbf{Error handling:} Appropriate error messages for invalid operations
+\end{itemize}
+
+\textbf{Design considerations:}
+\vspace{-1em}
+\begin{itemize}
+    \item Follow existing code patterns and conventions
+    \item Consider how tags interact with CAF's commit model
+    \item Think about error cases and edge cases (duplicate tags, invalid commits, etc.)
+    \item Not every edge case needs to be handled, but you should document any limitations or assumptions in your design
+    \item Ensure your code is readable, maintainable, documented and properly formatted
+\end{itemize}
+
+\textbf{Implementation guide:}
+\vspace{-1em}
+\begin{enumerate}
+    \item Start with data structures and storage format
+    \item Implement core tag operations (create, list, delete)
+    \item Write tests for the core operations before integrating with the CLI
+    \item Add CLI command implementations
+    \item Write tests for the CLI commands to ensure they work as expected
+    \item Integrate your code with the existing CLI system in a way that feels natural and consistent, and test the CLI commands manually
+    \item Cover your implementation by writing tests for edge cases and error conditions that you can think of
+    \item Document your code
+    \item There is no need to test that your core objects work (e.g., tags), since if you followed the existing patterns, they should not be doing much
+\end{enumerate}
+
+\textbf{Deliverable:}
+\vspace{-1em}
+\begin{itemize}
+    \item Research summary (one paragraph)
+    \item Summary of your design and implementation approach (one-two paragraphs)
+    \item If you encounter challenges, describe how you addressed them or what help you needed
+    \item Complete implementation with tests: link to a branch or pull request in your forked repository
+    \item Your branch or pull request should be clearly organized and easy to navigate
+\end{itemize}
+
+\adventuresection{GRADING}
+
+Your assignment will be evaluated on both absolute quality and relative performance.
+We assess the technical accuracy of your work and the clarity and depth of your explanations.
+Additionally, your submission will be compared against other students' work to ensure fair and consistent grading standards.
+
+Grading is based on your code and written submission with the following criteria:
+\begin{center}
+    \begin{tabular}{|l|c|p{6cm}|}
+        \hline
+        \textbf{Task}                & \textbf{Points} & \textbf{Key Criteria}                             \\
+        \hline
+        Task 1: File analysis        & 20              & Completeness, insight, clarity                    \\
+        \hline
+        Task 2: Architecture diagram & 20              & Accuracy, clarity, completeness                   \\
+        \hline
+        Task 3: Environment setup    & -               & -                                                 \\
+        \hline
+        Task 4: Debugging fixes      & 20              & Correctness, clear explanations, logical changes  \\
+        \hline
+        Task 5: Tag implementation   & 30              & Working feature, thoughtful design, comprehensive tests \\
+        \hline
+        Code quality and style       & 10              & Follows patterns, readable, well-documented       \\
+        \hline
+        \textbf{Total}               & \textbf{100}    &                                                   \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\clearpage
+\adventuresection{SUBMISSION CHECKLIST}
+
+\textbf{Required deliverables:}
+\vspace{-1em}
+\begin{enumerate}
+    \item[$\square$] \textbf{File analysis:} Table or list summarizing the purpose, role, and relationships of each significant file or group of files
+    \item[$\square$] \textbf{Architecture diagram:} Clear visual map with brief explanation
+    \item[$\square$] \textbf{Bug fixes:} Detailed explanation of each fix with reasoning and link to your forked repository
+    \item[$\square$] \textbf{Tag feature:} Research, design considerations, link to your implementation branch
+    \item[$\square$] \textbf{Reflection (optional):} 1--2 paragraphs on what you learned, challenges faced, and how you overcame them.
+          You can also include any additional insights or thoughts on the project and your experience with it, and what you would like to explore further in this class.
+\end{enumerate}
+
+\textbf{Submission format:}
+\vspace{-1em}
+\begin{itemize}
+    \item[$\square$] Single PDF document with all written work, except for diagrams which can be in another PNG, JPG, or PPTX file, or part of the PDF
+    \item[$\square$] PDF file should link to your GitHub repository for code changes where applicable in a clear way
+    \item[$\square$] Clear section headers matching assignment structure
+    \item[$\square$] Readable fonts, appropriate formatting and general presentation
+    \item[$\square$] Include your names and ID numbers at the top of the document
+    \item[$\square$] Submissions should be in English or Hebrew. The level of your English will not affect your grade, so please give it your best effort because technical writing is usually done in English
+\end{itemize}
+
+\clearpage
+\adventuresection{CONCLUSION}
+\vspace{-1em}
+\begin{center}
+    \includegraphics[width=\textwidth]{assets/hr-fancy}
+\end{center}
+
+You've now journeyed through the complete lifecycle of working with a real-world codebase: from initial exploration and understanding, through debugging and problem-solving, to extending the system with new functionality.
+
+These skills—reading unfamiliar code, mapping system architecture, debugging methodically, and implementing features thoughtfully—are fundamental to professional software development.
+The experience of working with CAF mirrors what you'll encounter in industry: inheriting existing systems, understanding their design decisions, and evolving them to meet new requirements.
+
+Remember that the best engineers are not those who never encounter problems, but those who approach problems systematically, communicate their findings clearly, and persist through challenges with creativity and determination.
+
+The foundation you've built here will serve you well throughout this course and in your future work with complex systems.
+We hope you are proud of what you have accomplished.
+
+\vspace{2em}
+\begin{center}
+    \textit{Well done! You've not just explored the temple—you've added to its architecture.}
+\end{center}
+
+\end{document}

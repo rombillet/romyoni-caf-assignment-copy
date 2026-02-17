@@ -1,0 +1,55 @@
+[project]
+name = 'asp-caf-assignment'
+version = '0.0.1'
+description = 'Content Addressable Filesystem (CAF): An educational git-like version control system'
+readme = 'README.md'
+license = { file = 'LICENSE' }
+requires-python = '>=3.12'
+authors = [
+    { name = 'CAF Development Team' },
+]
+keywords = [
+    'version-control',
+    'git', 'filesystem',
+    'content-addressable',
+    'educational',
+    'c++',
+    'python',
+    'bindings',
+    'pybind11'
+]
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Education',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: C++',
+    'Topic :: Software Development :: Version Control',
+    'Topic :: System :: Filesystems',
+]
+
+[project.urls]
+homepage = 'https://github.com/idoby/asp-caf-assignment'
+repository = 'https://github.com/idoby/asp-caf-assignment'
+issues = 'https://github.com/idoby/asp-caf-assignment/issues'
+
+# === Tool Configuration ===
+
+[tool.setuptools]
+packages = []  # This is a workspace, not a package
+
+[tool.pytest.ini_options]
+addopts = ['--verbose']
+
+[tool.ruff]
+line-length = 120
+exclude = ['libcaf/_libcaf.pyi']
+
+[tool.ruff.lint]
+select = ['ALL']
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = 'single'

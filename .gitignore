@@ -1,0 +1,16 @@
+__pycache__/
+.vscode/
+*.so
+.idea/
+*.egg-info/
+libcaf/build/
+build/
+.caf
+libcaf/_libcaf.pyi
+
+assignment/artifacts/*
+!assignment/artifacts/asp26-assignment1.pdf
+
+coverage
+
+.envrc

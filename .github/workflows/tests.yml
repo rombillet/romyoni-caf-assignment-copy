@@ -1,0 +1,58 @@
+name: Test CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      CONTAINER_NAME: caf-dev-container
+      IMAGE_NAME: caf-dev-image
+      ENABLE_COVERAGE: 1  # Ensures Makefile builds with coverage
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: make build-container
+
+    - name: Start Docker container
+      run: |
+        docker run -dit --name $CONTAINER_NAME \
+          -v ${{ github.workspace }}:/workspace $IMAGE_NAME
+
+    - name: Wait for container to be ready
+      run: |
+        echo "Waiting for container to be ready..."
+        timeout 30 bash -c 'until docker exec $CONTAINER_NAME echo "Container ready"; do sleep 1; done'
+
+    - name: Deploy with coverage
+      run: docker exec $CONTAINER_NAME make deploy ENABLE_COVERAGE=1
+
+    - name: Run tests with coverage
+      run: docker exec $CONTAINER_NAME make test ENABLE_COVERAGE=1
+
+    - name: Upload Python coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: python-coverage
+        path: tests/.coverage/python.*
+
+    - name: Upload C++ coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cpp-coverage
+        path: tests/.coverage/cpp.info
+
+    - name: Cleanup Docker container
+      if: always()
+      run: |
+        docker stop $CONTAINER_NAME || true
+        docker rm $CONTAINER_NAME || true

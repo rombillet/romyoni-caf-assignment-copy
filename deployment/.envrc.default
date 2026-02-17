@@ -1,0 +1,5 @@
+# CAF Development Environment Configuration
+# This file is automatically loaded by direnv when you cd into this directory
+
+# Default development settings
+export ENABLE_COVERAGE=0

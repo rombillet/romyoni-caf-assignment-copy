@@ -1,0 +1,18 @@
+[build-system]
+requires = ['setuptools >= 80.9']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'caf'
+version = '0.0.1'
+requires-python = '>=3.12'
+
+[project.scripts]
+caf = "caf.__main__:main"
+
+[project.optional-dependencies]
+test = [
+    'coverage>=7.10.7',
+    'pytest>=8.4.2',
+    'pytest-cov>=7.0.0'
+]
