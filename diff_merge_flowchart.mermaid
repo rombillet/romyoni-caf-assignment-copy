@@ -1,0 +1,141 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#4A90D9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2C5F8A', 'lineColor': '#555', 'secondaryColor': '#F5A623', 'tertiaryColor': '#7ED321', 'fontSize': '13px'}, 'flowchart': {'nodeSpacing': 30, 'rankSpacing': 40, 'curve': 'basis'}}}%%
+
+flowchart TB
+    classDef input fill:#2196F3,stroke:#1565C0,color:#fff,stroke-width:2px,font-weight:bold
+    classDef process fill:#4CAF50,stroke:#2E7D32,color:#fff,stroke-width:2px
+    classDef decision fill:#FF9800,stroke:#E65100,color:#fff,stroke-width:2px
+    classDef conflict fill:#F44336,stroke:#B71C1C,color:#fff,stroke-width:2px,font-weight:bold
+    classDef output fill:#9C27B0,stroke:#6A1B9A,color:#fff,stroke-width:2px,font-weight:bold
+    classDef storage fill:#00BCD4,stroke:#00838F,color:#fff,stroke-width:2px
+    classDef note fill:#FFF9C4,stroke:#F9A825,color:#333,stroke-width:1px
+
+    %% ==================== DIFF FLOW ====================
+    subgraph DIFF_FLOW["⬛  DIFF FLOW  —  caf diff commit1 commit2"]
+        direction TB
+
+        D_IN["INPUT: two commit references"]:::input
+        D_RESOLVE["Resolve refs to commit hashes\n(resolve_ref)"]:::process
+        D_LOAD["Load Commit objects → Load root Trees\n(C++ deserialization from .caf/objects/)"]:::storage
+        D_INIT["Initialize DFS stack with both trees\n+ potentially_added & potentially_removed dicts"]:::process
+
+        D_IN --> D_RESOLVE --> D_LOAD --> D_INIT
+
+        D_TRAVERSE["Stack-based tree traversal:\nPop (tree1, tree2), gather all entry names"]:::process
+        D_INIT --> D_TRAVERSE
+
+        D_BOTH{"Entry exists\nin both trees?"}:::decision
+        D_TRAVERSE --> D_BOTH
+
+        D_HASH{"Hashes\nequal?"}:::decision
+        D_BOTH -- "Yes, in both" --> D_HASH
+
+        D_HASH -- "Yes" --> D_UNCHANGED["No change — skip"]:::process
+        D_HASH -- "No" --> D_TREE_CHECK{"Both are\nTREE type?"}:::decision
+        D_TREE_CHECK -- "Yes" --> D_RECURSE["Push subtrees onto stack\n(recurse into subdirectories)"]:::process
+        D_TREE_CHECK -- "No (blobs)" --> D_MODIFIED["✎ ModifiedDiff"]:::output
+
+        D_ONLY1{"Only in\ntree1?"}:::decision
+        D_BOTH -- "Only in tree1" --> D_ONLY1
+
+        D_ONLY1 -- "Hash found in\npotentially_added" --> D_MOVE1["↗ MovedToDiff\n+ link to MovedFromDiff"]:::output
+        D_ONLY1 -- "Hash NOT\ntracked" --> D_REMOVED["✕ RemovedDiff\n+ store hash in potentially_removed"]:::output
+
+        D_ONLY2{"Only in\ntree2?"}:::decision
+        D_BOTH -- "Only in tree2" --> D_ONLY2
+
+        D_ONLY2 -- "Hash found in\npotentially_removed" --> D_MOVE2["↗ MovedFromDiff\n+ link to MovedToDiff"]:::output
+        D_ONLY2 -- "Hash NOT\ntracked" --> D_ADDED["✚ AddedDiff\n+ store hash in potentially_added"]:::output
+
+        D_RESULT["OUTPUT: List of Diff objects\nAddedDiff · RemovedDiff · ModifiedDiff · MovedTo/FromDiff\n(hierarchical tree with parent/children)"]:::output
+
+        D_UNCHANGED --> D_RESULT
+        D_RECURSE --> D_RESULT
+        D_MODIFIED --> D_RESULT
+        D_MOVE1 --> D_RESULT
+        D_REMOVED --> D_RESULT
+        D_MOVE2 --> D_RESULT
+        D_ADDED --> D_RESULT
+    end
+
+    %% ==================== MERGE FLOW ====================
+    subgraph MERGE_FLOW["⬛  MERGE FLOW  —  merge_commits ref1, ref2"]
+        direction TB
+
+        M_IN["INPUT: two commit references\n(ours & theirs)"]:::input
+        M_RESOLVE["Resolve refs to commit hashes"]:::process
+        M_ANCESTOR["Find common ancestor:\nWalk ours parent chain → set\nWalk theirs chain until match found"]:::process
+        M_ANC_DEC{"Ancestor\nfound?"}:::decision
+
+        M_IN --> M_RESOLVE --> M_ANCESTOR --> M_ANC_DEC
+
+        M_ANC_DEC -- "No" --> M_EMPTY["Use empty tree as base"]:::process
+        M_ANC_DEC -- "Yes" --> M_LOAD["Load 3 trees from object store:\nbase · ours · theirs"]:::storage
+        M_EMPTY --> M_LOAD
+
+        M_MERGE["merge_trees_core:\nIterate sorted entry names\nfrom base ∪ ours ∪ theirs"]:::process
+        M_LOAD --> M_MERGE
+
+        %% 3-way merge rules
+        M_R1{"ours == theirs?"}:::decision
+        M_MERGE --> M_R1
+        M_R1 -- "Yes" --> M_TAKE_AGREE["Take agreed value\n(or skip if both deleted)"]:::process
+
+        M_R2{"base == ours?\n(ours unchanged)"}:::decision
+        M_R1 -- "No" --> M_R2
+        M_R2 -- "Yes" --> M_FF_THEIRS["Fast-forward: take theirs"]:::process
+
+        M_R3{"base == theirs?\n(theirs unchanged)"}:::decision
+        M_R2 -- "No" --> M_R3
+        M_R3 -- "Yes" --> M_FF_OURS["Fast-forward: take ours"]:::process
+
+        M_TYPE{"Both changed —\nentry types?"}:::decision
+        M_R3 -- "No" --> M_TYPE
+
+        M_TYPE -- "Both TREE" --> M_REC_TREE["Recurse:\nmerge_trees_core on subtrees"]:::process
+
+        M_TYPE -- "Both BLOB" --> M_BIN{"Is binary?\n(null bytes or\n>30% non-text)"}:::decision
+
+        M_TYPE -- "Type mismatch\nor one-side delete" --> M_TYPE_CONFLICT["CONFLICT: choose ours or theirs\n+ record conflict path"]:::conflict
+
+        %% Text blob merge
+        M_BIN -- "Text file" --> M_TEXT["3-way line merge\n(merge3 library via mmap)"]:::process
+        M_TEXT --> M_TEXT_OK{"Lines\nconflict?"}:::decision
+        M_TEXT_OK -- "No" --> M_CLEAN["Save clean merged blob"]:::storage
+        M_TEXT_OK -- "Yes" --> M_MARKERS["Insert conflict markers:\n<<<<<<< ours\n... our lines ...\n=======\n... their lines ...\n>>>>>>> theirs"]:::conflict
+        M_MARKERS --> M_SAVE_C["Save blob with markers\n+ record conflict path"]:::conflict
+
+        %% Binary blob merge
+        M_BIN -- "Binary file" --> M_BIN_LOGIC["Heuristic merge:\n1) Both same hash → take it\n2) Ours unchanged → take theirs\n3) Theirs unchanged → take ours\n4) Both changed → keep ours + CONFLICT"]:::process
+        M_BIN_LOGIC --> M_BIN_DEC{"Binary\nconflict?"}:::decision
+        M_BIN_DEC -- "No" --> M_BIN_OK["Save chosen blob"]:::storage
+        M_BIN_DEC -- "Yes" --> M_BIN_CONF["Keep ours\n+ record conflict path"]:::conflict
+
+        %% Final output
+        M_SAVE_TREE["Save merged Tree to\ncontent-addressable object store"]:::storage
+
+        M_TAKE_AGREE --> M_SAVE_TREE
+        M_FF_THEIRS --> M_SAVE_TREE
+        M_FF_OURS --> M_SAVE_TREE
+        M_REC_TREE --> M_SAVE_TREE
+        M_TYPE_CONFLICT --> M_SAVE_TREE
+        M_CLEAN --> M_SAVE_TREE
+        M_SAVE_C --> M_SAVE_TREE
+        M_BIN_OK --> M_SAVE_TREE
+        M_BIN_CONF --> M_SAVE_TREE
+
+        M_OUT["OUTPUT: MergeResult\ntree_hash (merged tree root)\nconflicts (list of conflicted paths)"]:::output
+        M_SAVE_TREE --> M_OUT
+    end
+
+    %% ==================== OBJECT STORE ====================
+    subgraph STORE["CONTENT-ADDRESSABLE OBJECT STORE  (.caf/objects/)"]
+        direction LR
+        S1["Blob\nSHA-1 of file content"]:::storage
+        S2["Tree\nSHA-1 of records concat\nname+type+hash per entry"]:::storage
+        S3["Commit\nSHA-1 of tree_hash+author\n+message+timestamp+parent"]:::storage
+        S4["Storage path:\nobjects/ first-2-hex / rest-of-hash\nC++ serialization with\nlength-prefixed strings"]:::note
+    end
+
+    D_LOAD -.-> STORE
+    M_LOAD -.-> STORE
+    M_SAVE_TREE -.-> STORE
